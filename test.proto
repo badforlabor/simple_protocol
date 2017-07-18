@@ -1,0 +1,54 @@
+/*
+    语法规则：
+        注释：使用C格式的
+        关键字package
+        关键字message定义协议
+        变量类型：int,float,string,嵌套message
+        支持数组，使用repeated关键字
+*/
+
+
+package gamedef;
+
+// ==========================================================
+// 系统消息
+// ==========================================================
+
+// 一个连接接入
+message SessionAccepted
+{
+
+}
+
+// 已连接
+message SessionConnected
+{
+
+}
+
+// ==========================================================
+// 测试用消息
+// ==========================================================
+message TestEchoACK
+{
+	string Content;
+	string Content2;
+}
+
+message NestedMessage
+{
+ TestEchoACK Acks;      // 嵌套语句
+ int id;
+ float f;
+ string str;
+}
+
+message ArrayMessage
+{
+ repeated int datas;
+ repeated string msgs;
+ repeated NestedMessage p;
+ int id;
+ float f;
+ string str;
+}
