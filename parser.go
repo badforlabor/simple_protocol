@@ -1,5 +1,10 @@
 package main
 
+import (
+	"fmt"
+	"strings"
+)
+
 /*
 	解析proto文件：
 
@@ -143,3 +148,215 @@ package main
 
 */
 
+const (
+	errComemnt = "comment syntax error."
+
+	runeSpace      = ' '
+	runeTAB        = '\t'
+	runeReturn     = '\r'
+	runeReturnLine = '\n'
+	runeSemicolon  = ';'
+)
+
+type Parser struct {
+	scanner *strings.Reader
+}
+
+type variable struct {
+	name         string
+	variableType string
+	array        bool
+	comments     []string
+	lineComment  string
+	parsed       bool
+}
+
+type variableClass struct {
+	name      string
+	variables []variable
+	comments  []string
+	parsed    bool
+}
+type messagePackage struct {
+	name     string
+	classes  []variableClass
+	comments []string
+}
+
+func NewParser(str string) *Parser {
+	p := &Parser{scanner: strings.NewReader(str)}
+	return p
+}
+
+func (p *Parser) DoParse() error {
+
+	fmt.Println("do parse.")
+
+	s := p.readComment()
+	fmt.Print(s)
+
+	return nil
+}
+func (p *Parser) unread(n int) {
+	for n > 0 {
+		p.scanner.UnreadRune()
+		n--
+	}
+}
+
+// 读取空格，直到不是空格为止
+func (p *Parser) readAllSpace() int {
+	n := 0
+	for {
+		s, _, err := p.scanner.ReadRune()
+		if err != nil {
+			break
+		} else {
+			if s == runeSpace || s == runeTAB {
+				n++
+			} else {
+				p.scanner.UnreadRune()
+				break
+			}
+		}
+	}
+	return n
+}
+
+// 读取换行，直到不是换行为止
+func (p *Parser) readReturn() int {
+	n := 0
+	for {
+		s, _, err := p.scanner.ReadRune()
+		if err != nil {
+			break
+		} else {
+
+			if s == runeReturn {
+				s, _, err = p.scanner.ReadRune()
+				if err != nil || s != runeReturnLine {
+					p.scanner.UnreadRune()
+					p.scanner.UnreadRune()
+					break
+				}
+			}
+
+			if s == runeReturnLine || s == runeSemicolon {
+				n++
+			} else if s == runeSpace || s == runeTAB {
+				space := p.readAllSpace()
+				if space > 0 {
+					// 如果空格后面是换行符，那么说明是有效的空行
+					s, _, err = p.scanner.ReadRune()
+
+					if s == runeReturn {
+						s, _, err = p.scanner.ReadRune()
+						if err != nil || s != runeReturnLine {
+							// 无效的空行，所以得回退咯
+							p.scanner.UnreadRune()
+							p.unread(space + 1)
+							break
+						}
+					}
+					if s == runeReturnLine || s == runeSemicolon {
+						n++
+					} else {
+						// 无效的空行，所以得回退咯
+						p.unread(space + 1)
+						break
+					}
+				} else {
+					break
+				}
+			} else {
+				p.scanner.UnreadRune()
+				break
+			}
+		}
+	}
+	return n
+}
+
+func (p *Parser) readComment() string {
+
+	backup := p.scanner.Size() - int64(p.scanner.Len())
+
+	defer func() {
+		if backup >= 0 {
+			cur := p.scanner.Size() - int64(p.scanner.Len())
+			for cur > backup {
+				p.scanner.UnreadByte()
+				cur--
+			}
+		}
+	}()
+
+	p.readAllSpace()
+	p.readReturn()
+
+	s, _, err := p.scanner.ReadRune()
+	if err != nil {
+		return ""
+	}
+	if s != '/' {
+		p.scanner.UnreadRune()
+		return ""
+	}
+
+	s, _, err = p.scanner.ReadRune()
+	if err != nil {
+		p.scanner.UnreadRune()
+		return ""
+	}
+
+	if s == '/' {
+		backup = -1
+		// 整行内容为注释
+		comment := "//"
+		for {
+			s, _, err = p.scanner.ReadRune()
+			if err != nil {
+				break
+			}
+			if s == runeReturnLine {
+				break
+			}
+			comment = strings.Join([]string{comment, string(s)}, "")
+		}
+
+		backup = -1
+		return comment
+
+	} else if s == '*' {
+		backup = -1
+		// 接下来的内容为注释
+		comment := "/*"
+		last := ' '
+		parsed := false
+		for {
+			s, _, err = p.scanner.ReadRune()
+			if err != nil {
+				break
+			}
+
+			comment = strings.Join([]string{comment, string(s)}, "")
+
+			if last == '*' && s == '/' {
+				parsed = true
+				break
+			}
+			last = s
+		}
+
+		// 没有找到对应的‘*/’，所以直接抛异常
+		if !parsed {
+			panic(errComemnt)
+		}
+
+		return comment
+	} else {
+		p.scanner.UnreadRune()
+		p.scanner.UnreadRune()
+		return ""
+	}
+}
