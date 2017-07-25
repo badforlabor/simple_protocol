@@ -1,9 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
-	"fmt"
 )
 
 func main() {
@@ -15,7 +15,6 @@ func main() {
 			fmt.Println(r)
 		}
 	}()
-
 
 	filename := "test.proto"
 
