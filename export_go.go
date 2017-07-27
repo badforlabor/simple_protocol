@@ -20,3 +20,7 @@ package main
 
 
 */
+
+func exportGoFile(pack *messagePackage) {
+
+}
