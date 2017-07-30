@@ -8,6 +8,9 @@ import (
 
 func main() {
 
+	exportGoFile(nil)
+	return
+
 	// 结果解析过程中的异常
 	defer func() {
 		r := recover()
