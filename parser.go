@@ -389,6 +389,10 @@ func (p *Parser) readLineComment() string {
 		c = p.readRune()
 	}
 
+	if c == runeReturnLine {
+		return ""
+	}
+
 	if c == runeReturn {
 		c = p.readRune()
 		if c == runeReturnLine {
