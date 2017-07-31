@@ -220,6 +220,8 @@ func (p *Parser) DoParse() error {
 	}
 	ioutil.WriteFile("out.json", data, os.ModePerm)
 
+	exportGoFile(p.pack)
+
 	return nil
 }
 func (p *Parser) unread(n int) {

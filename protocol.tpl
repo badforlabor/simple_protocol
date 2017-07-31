@@ -14,12 +14,22 @@ type {{.MessageName}} struct {
 }
 func (msg *{{.MessageName}}) ReadMsg(buffer *BinaryBuffer) {
     {{range .MessageVariables}}
-    msg.{{.VariableName}} = buffer.{{readVariable .VariableType}}
+    {{$bCls := isClsType .VariableType}}
+    {{if $bCls}}
+        msg.{{.VariableName}}.ReadMsg(buffer)
+    {{else}}
+        msg.{{.VariableName}} = buffer.{{readVariable .VariableType .VariableArray}}
+    {{end}}
     {{end}}
 }
 func (msg *{{.MessageName}}) WriteMsg(buffer *BinaryBuffer) {
     {{range .MessageVariables}}
-    {{writeVariable .VariableType}}(msg.{{.VariableName}})
+        {{$bCls := isClsType .VariableType}}
+        {{if $bCls}}
+            msg.{{.VariableName}}.WriteMsg(buffer)
+        {{else}}
+            {{writeVariable .VariableType .VariableArray}}(msg.{{.VariableName}})
+        {{end}}
     {{end}}
 }
 {{end}}
