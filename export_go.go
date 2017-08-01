@@ -2,8 +2,10 @@ package main
 
 import (
 	"fmt"
-	"html/template"
+	"text/template"
 	"os"
+	"bytes"
+	"io/ioutil"
 )
 
 /*
@@ -50,6 +52,7 @@ func exportGoFile(pack *messagePackage) {
 	t = t.Funcs(template.FuncMap{"readVariable": ReadVariable})
 	t = t.Funcs(template.FuncMap{"writeVariable": WriteVariable})
 	t = t.Funcs(template.FuncMap{"isClsType": isClsType})
+	t = t.Funcs(template.FuncMap{"isArray": isArray})
 
 	t = template.Must(t.ParseFiles("protocol.tpl"))
 
@@ -68,7 +71,9 @@ func exportGoFile(pack *messagePackage) {
 			}
 			pack1.Messages = append(pack1.Messages, msg)
 		}
-
+		buffer := bytes.NewBufferString("")
+		t.Execute(buffer, pack1)
+		ioutil.WriteFile("binary_proto.go", buffer.Bytes(), os.ModePerm)
 	} else {
 
 		// 调试
@@ -80,9 +85,10 @@ func exportGoFile(pack *messagePackage) {
 		msg1.MessageName = "msg1"
 
 		pack1 = goPackage{"test", []goMessage{msg1}, []string{"//1"}}
+
+		t.Execute(os.Stdout, pack1)
 	}
 
-	t.Execute(os.Stdout, pack1)
 
 	fmt.Println("finished.")
 }
@@ -125,7 +131,7 @@ func ReadVariable(variableType string, variableArray string) string {
 		}
 	case "string":
 		if barray {
-			panic("not support string array")
+			return "ReadStringArray()"
 		}
 		return "ReadString()"
 	}
@@ -139,18 +145,16 @@ func WriteVariable(variableType string, variableArray string) string {
 	case "int32":
 		if barray {
 			return "WriteIntArray"
-		} else {
-			return "WriteInt"
 		}
+		return "WriteInt"
 	case "float32":
 		if barray {
 			return "WriteFloatArray"
-		} else {
-			return "WriteFloat"
 		}
+		return "WriteFloat"
 	case "string":
 		if barray {
-			panic("not support string array")
+			return "WriteStringArray"
 		}
 		return "WriteString"
 	}

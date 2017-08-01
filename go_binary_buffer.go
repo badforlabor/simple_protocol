@@ -20,8 +20,14 @@ func init() {
 	order = binary.LittleEndian
 }
 
-func NewBinaryBuffer() *BinaryBuffer {
-	return &BinaryBuffer{buffer : new(bytes.Buffer)}
+func NewBinaryBuffer(data []byte) *BinaryBuffer {
+	if data == nil {
+		return &BinaryBuffer{buffer : new(bytes.Buffer)}
+	}
+	return &BinaryBuffer{buffer : bytes.NewBuffer(data)}
+}
+func (buffer *BinaryBuffer) GetBytes() []byte {
+	return buffer.buffer.Bytes()
 }
 func (buffer *BinaryBuffer) WriteInt(v int32) {
 	binary.Write(buffer.buffer, order, v)
@@ -89,10 +95,25 @@ func (buffer *BinaryBuffer) ReadFloatArray() []float32 {
 	}
 	return ret
 }
+func (buffer *BinaryBuffer) WriteStringArray(v []string) {
+	var size int32 = int32(len(v))
+	buffer.WriteInt(size)
+	for i:=int32(0); i < size; i++ {
+		buffer.WriteString(v[i])
+	}
+}
+func (buffer *BinaryBuffer) ReadStringArray() []string {
+	var v int32 = buffer.ReadInt()
+	ret := make([]string, v)
+	for i:=int32(0); i < v; i++ {
+		ret[i] = buffer.ReadString()
+	}
+	return ret
+}
 
 
 func testBinaryBuffer() {
-	buffer := NewBinaryBuffer()
+	buffer := NewBinaryBuffer(nil)
 
 	var a int32 = 30
 	var b float32 = 4.2
