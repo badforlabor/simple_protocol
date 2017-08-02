@@ -1,11 +1,11 @@
 package main
 
 import (
-	"fmt"
-	"text/template"
-	"os"
 	"bytes"
+	"fmt"
 	"io/ioutil"
+	"os"
+	"text/template"
 )
 
 /*
@@ -28,7 +28,6 @@ import (
 
 
 */
-
 
 func exportCsFile(pack *messagePackage) {
 
@@ -57,7 +56,7 @@ func exportCsFile(pack *messagePackage) {
 		}
 		buffer := bytes.NewBufferString("")
 		t.Execute(buffer, pack1)
-		ioutil.WriteFile("binary_proto.cs", buffer.Bytes(), os.ModePerm)
+		ioutil.WriteFile("BinaryProtocol.cs", buffer.Bytes(), os.ModePerm)
 	} else {
 
 		// 调试
@@ -72,7 +71,6 @@ func exportCsFile(pack *messagePackage) {
 
 		t.Execute(os.Stdout, pack1)
 	}
-
 
 	fmt.Println("finished.")
 }

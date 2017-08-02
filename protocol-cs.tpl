@@ -55,7 +55,7 @@ namespace Net
     public class {{.MessageName}} : GbProtocol
     {
         {{range .MessageVariables -}}
-        {{.VariableType}}{{.VariableArray}} {{.VariableName}}; {{.VariableLineComment}}
+        public {{.VariableType}}{{.VariableArray}} {{.VariableName}}; {{.VariableLineComment}}
         {{end}}
 
         public void ReadMsg(BinaryBuffer buffer)
@@ -67,7 +67,7 @@ namespace Net
                     {{if $barray}}
             {
                 int size = buffer.ReadInt();
-                {{.VariableName}} = new ({{.VariableType}}[size]);
+                {{.VariableName}} = new {{.VariableType}}[size];
                 for (int i=0; i < size; i++)
                 {
                     {{.VariableName}}[i] = new {{.VariableType}}();
@@ -91,7 +91,7 @@ namespace Net
                 {{if $bCls -}}
                     {{if $barray}}
             {
-                int size = {{.VariableName}}.length
+                int size = {{.VariableName}}.Length;
                 buffer.WriteInt(size);
                 for(int i = 0; i < size; i++)
                 {
