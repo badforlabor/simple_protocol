@@ -221,6 +221,7 @@ func (p *Parser) DoParse() error {
 	ioutil.WriteFile("out.json", data, os.ModePerm)
 
 	exportGoFile(p.pack)
+	exportCsFile(p.pack)
 
 	return nil
 }

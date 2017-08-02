@@ -117,12 +117,16 @@ func ReadVariable(variableType string, variableArray string) string {
 	barray := isArray(variableArray)
 
 	switch variableType {
+	case "int":
+		fallthrough
 	case "int32":
 		if barray {
 			return "ReadIntArray()"
 		} else {
 			return "ReadInt()"
 		}
+	case "float":
+		fallthrough
 	case "float32":
 		if barray {
 			return "ReadFloatArray()"
@@ -142,11 +146,15 @@ func WriteVariable(variableType string, variableArray string) string {
 	barray := isArray(variableArray)
 
 	switch variableType {
+	case "int":
+		fallthrough
 	case "int32":
 		if barray {
 			return "WriteIntArray"
 		}
 		return "WriteInt"
+	case "float":
+		fallthrough
 	case "float32":
 		if barray {
 			return "WriteFloatArray"
@@ -167,7 +175,11 @@ func isClsType(variableType string) bool {
 	switch variableType {
 	case "int32":
 		return false
+	case "int":
+		return false
 	case "float32":
+		return false
+	case "float":
 		return false
 	case "string":
 		return false
