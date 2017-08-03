@@ -5,10 +5,14 @@
 {{range .PackComments}}{{.}}{{end}}
 package main//{{.PackName}}
 
+import 	"github.com/badforlabor/cellnet/proto/newprotocol"
+
+/*
 type BinaryProtocol interface {
     ReadMsg(buffer * BinaryBuffer)
     WriteMsg(buffer * BinaryBuffer)
 }
+*/
 
 // 协议映射关系
 const (
@@ -47,7 +51,7 @@ type {{.MessageName}} struct {
     {{.VariableName}} {{.VariableArray}}{{.VariableType}} {{.VariableLineComment}}
     {{end}}
 }
-func (msg *{{.MessageName}}) ReadMsg(buffer *BinaryBuffer) {
+func (msg *{{.MessageName}}) ReadMsg(buffer *newprotocol.BinaryBuffer) {
     {{range .MessageVariables -}}
         {{$bCls := isClsType .VariableType -}}
         {{$barray := isArray .VariableArray -}}
@@ -68,7 +72,7 @@ func (msg *{{.MessageName}}) ReadMsg(buffer *BinaryBuffer) {
         {{- end}}
     {{end}}
 }
-func (msg *{{.MessageName}}) WriteMsg(buffer *BinaryBuffer) {
+func (msg *{{.MessageName}}) WriteMsg(buffer *newprotocol.BinaryBuffer) {
     {{range .MessageVariables -}}
         {{$bCls := isClsType .VariableType -}}
         {{$barray := isArray .VariableArray -}}
